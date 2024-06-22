@@ -12,8 +12,7 @@ config = loads(data)
 
 TOKEN = config["token"]
 
-MAIN_CHANNEL = config["channels"]["main"]
-BACKUP_CHANNEL = config["channels"]["backup"]
+CHANNELS = config["channels"]
 
 initFirebase()
 

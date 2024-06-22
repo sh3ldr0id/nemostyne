@@ -1,6 +1,7 @@
 from app import bot
 from app.helpers.verified import isVerified
 from app.helpers.folder_name import sanitize
+from app.helpers.path import getPath
 
 from firebase_admin import firestore
 
@@ -38,4 +39,4 @@ def create_folder(message):
 
             user_doc.update({"listening": None})
 
-            bot.reply_to(message, f"Done! Created '{message.text}' in '{current_folder.get().get('name')}'")
+            bot.reply_to(message, f"Done! Created '{message.text}' in {getPath(current_folder_id)}")

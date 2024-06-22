@@ -14,13 +14,11 @@ def delete_folder(folder_doc):
     folders = folder.get("folders")
     files = folder.get("files")
 
-    print(files, folders)
-
     for fileId in files:
         files_collection.document(fileId).delete()
 
     for folderId in folders:
-        delete_folder(files_collection.document(folderId))
+        delete_folder(folders_collection.document(folderId))
 
     folder_doc.delete()
 
@@ -57,3 +55,5 @@ def delete(callback):
         file_doc.delete()
 
         bot.reply_to(callback.message, f"Deleted 📄 {file.get('name')}")
+
+    bot.delete_message(callback.message.chat.id, callback.message.message_id)

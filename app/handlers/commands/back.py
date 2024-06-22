@@ -1,5 +1,6 @@
 from app import bot
 from app.helpers.verified import isVerified
+from app.helpers.path import getPath
 
 from firebase_admin import firestore
 
@@ -27,6 +28,4 @@ def back(message):
 
         user_doc.update({"current": previous})
 
-        current_folder = folders_collection.document(previous).get()
-
-        bot.send_message(message.chat.id, f"Currently in '{current_folder.get('name')}'")
+        bot.send_message(message.chat.id, f"In {getPath(previous)}")

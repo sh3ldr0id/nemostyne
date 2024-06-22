@@ -1,5 +1,6 @@
 from app import bot
-from app.helpers.constants import MAIN_CHANNEL, OPEN_FOLDER, DELETE, FILE, FOLDER, PAGE
+from app.helpers.path import getPath
+from app.helpers.constants import OPEN_FOLDER, DELETE, FILE, FOLDER, PAGE
 
 from telebot import types
 
@@ -17,7 +18,7 @@ def retrive(message, currentFolder="Home", page=1):
         bot.reply_to(message, "Folder doesn't exist!")
         return False
     
-    bot.send_message(message.chat.id, f"Viewing '{current_folder.get('name')}'")
+    bot.send_message(message.chat.id, f"Viewing {getPath(currentFolder)}")
     
     files = current_folder.get("files")
     folders = current_folder.get("folders")
@@ -49,21 +50,18 @@ def retrive(message, currentFolder="Home", page=1):
     for fileId in page_files:
         file = files_collection.document(fileId).get()
 
-        file_name = file.get("name")
         file_date = file.get("date")
-
-        message_id = file.get("main")
-
-        forwarded_message = bot.forward_message(message.chat.id, MAIN_CHANNEL, message_id)
+        file_id = file.get("file_id")
 
         markup = types.InlineKeyboardMarkup(row_width=1)
 
         delete = types.InlineKeyboardButton("Delete", callback_data=DELETE+FILE+f"_{fileId}")
         markup.add(delete)
 
-        bot.reply_to(
-            forwarded_message, 
-            f"📄 {file_name} \n📅 {file_date.strftime('%Y-%m-%d %H:%M:%S')}", 
+        bot.send_document(
+            message.chat.id, 
+            file_id, 
+            caption=f"📅 {file_date.strftime('%Y-%m-%d %H:%M:%S')}", 
             reply_markup=markup
         )
 

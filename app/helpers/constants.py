@@ -1,4 +1,4 @@
-from app import MAIN_CHANNEL, BACKUP_CHANNEL
+from app import CHANNELS
 
 OPEN_FOLDER = "CURRENT_"
 DELETE = "DELETE_"

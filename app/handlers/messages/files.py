@@ -1,6 +1,6 @@
 from app import bot
 from app.helpers.verified import isVerified
-from app.helpers.constants import MAIN_CHANNEL, BACKUP_CHANNEL
+from app.helpers.constants import CHANNELS
 
 from firebase_admin import firestore
 
@@ -26,9 +26,11 @@ def upload_files(message):
         return
 
     file_name = message.document.file_name
+    file_id = message.document.file_id
+    file_path = bot.get_file(file_id).file_path
             
-    main_message_id = bot.forward_message(MAIN_CHANNEL, message.chat.id, message.message_id).message_id
-    backup_message_id = bot.forward_message(BACKUP_CHANNEL, message.chat.id, message.message_id).message_id
+    for channel in CHANNELS:
+        bot.forward_message(channel, message.chat.id, message.message_id)
 
     current_folder_id = user.get("current")
     current_folder = folders_collection.document(current_folder_id)
@@ -38,8 +40,8 @@ def upload_files(message):
         "previous": current_folder_id,
         "name": file_name,
         "date": datetime.now(),
-        "main": main_message_id,
-        "backup": backup_message_id,
+        "file_id": file_id,
+        "file_path": file_path
     })[1].id
 
     current_folder.update({"files": firestore.ArrayUnion([file_id])})
