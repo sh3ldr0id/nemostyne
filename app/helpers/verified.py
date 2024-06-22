@@ -6,7 +6,7 @@ db = firestore.client()
 users_collection = db.collection("users")
 
 def isVerified(message):
-    user = users_collection.document(message.chat.id).get()
+    user = users_collection.document(str(message.chat.id)).get()
     
     if user.exists:
         try:
@@ -22,4 +22,4 @@ def isVerified(message):
         bot.send_message(message.chat.id, f"Please ask an Admin to verify your ID ({message.chat.id}).")
         return False
     
-    return True
+    return user

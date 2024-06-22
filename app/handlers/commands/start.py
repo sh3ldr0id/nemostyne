@@ -33,4 +33,4 @@ def start(message):
             reply_markup=markup
         )
         
-        retrive()
+        retrive(message)

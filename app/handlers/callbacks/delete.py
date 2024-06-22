@@ -1,6 +1,6 @@
-from app import bot, MAIN_CHANNEL, BACKUP_CHANNEL
+from app import bot
 from app.helpers.constants import FILE, FOLDER
-\
+
 from firebase_admin import firestore
 
 db = firestore.client()
@@ -8,22 +8,16 @@ db = firestore.client()
 files_collection = db.collection("files")
 folders_collection = db.collection("folders")
 
-def delete_file(file_doc):
-    file = file_doc.get()
-
-    name = file.get("name")
-    owner = file.get("owner")
-
-    file_doc.delete()
-
 def delete_folder(folder_doc):
     folder = folder_doc.get()
 
-    files = folder.get("files")
     folders = folder.get("folders")
+    files = folder.get("files")
+
+    print(files, folders)
 
     for fileId in files:
-        delete_file(files_collection.document(fileId))
+        files_collection.document(fileId).delete()
 
     for folderId in folders:
         delete_folder(files_collection.document(folderId))
@@ -34,53 +28,32 @@ def delete(callback):
     file_or_folder = callback.data.split("_")[1]
     item_id = callback.data.split("_")[2]
 
-    if file_or_folder == FILE:
+    if file_or_folder == FOLDER:
+        folder_doc = folders_collection.document(item_id)
+        folder = folder_doc.get()
+
+        if not folder.exists or item_id == "Home":
+            bot.reply_to(callback.message, "Folder doesn't exist!")
+            return
+
+        previous = folder.get("previous")
+        folders_collection.document(previous).update({"folders": firestore.ArrayRemove([item_id])}) 
+
+        delete_folder(folder_doc)
+
+        bot.reply_to(callback.message, f"Deleted 📁 {folder.get('name')}")
+
+    elif file_or_folder == FILE:
         file_doc = files_collection.document(item_id)
         file = file_doc.get()
 
         if not file.exists:
+            bot.reply_to(callback.message, "File doesn't exist!")
             return
 
         previous = file.get("previous")
+        folders_collection.document(previous).update({"files": firestore.ArrayRemove([item_id])}) 
 
-        owner = file.get("owner")
-        shared = file.get("shared")
+        file_doc.delete()
 
-        if owner == str(callback.message.chat.id) or shared == True or (shared != False and str(callback.message.chat.id) in shared):
-            delete_file(file_doc)
-
-            folders_collection.document(previous).update({"files": firestore.ArrayRemove([item_id])}) 
-            
-            end_message_id = bot.reply_to(callback.message, f"Deleted 📄 {file.get('name')}").message_id
-
-            deleteMessages(10, callback.message.chat.id, [callback.message.message_id, callback.message.reply_to_message.message_id, end_message_id])
-
-        else:
-            end_message_id = bot.reply_to(callback.message, f"Sorry, You're not authorized to perform actions on this file.").message_id
-            
-            deleteMessages(10, callback.message.chat.id, [callback.message.message_id, end_message_id])
-
-    elif file_or_folder == FOLDER:
-        folder_doc = folders_collection.document(item_id)
-        folder = file_doc.get()
-
-        if not folder.exists:
-            return
-
-        previous = file.get("previous")
-
-        owner = folder.get("owner")
-        shared = folder.get("shared")
-
-        if owner == callback.message.chat.id or shared == True or (shared != False and callback.message.chat.id in shared):
-            delete_folder(folder_doc)
-
-            folders_collection.document(previous).update({"folders": firestore.ArrayRemove([item_id])}) 
-
-            end_message_id = bot.reply_to(callback.message, f"Deleted 📁 {folder.get('name')}").message_id
-            deleteMessages(10, callback.message.chat.id, [callback.message.message_id, end_message_id])
-
-        else:
-            end_message_id = bot.reply_to(callback.message, f"Sorry, You're not authorized to perform actions on this folder.").message_id
-           
-            deleteMessages(10, callback.message.chat.id, [callback.message.message_id, end_message_id])
+        bot.reply_to(callback.message, f"Deleted 📄 {file.get('name')}")
