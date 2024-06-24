@@ -41,7 +41,6 @@ def upload_files(message):
         "name": file_name,
         "created": datetime.now(),
         "file_id": file_id,
-        "file_path": file_path
     })[1].id
 
     current_folder.update({"files": firestore.ArrayUnion([file_id])})
