@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>{{ name }}</title>
+{% endblock %}
+
+{% block body %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mt-2">
+        {% for item in locations %}
+            <li class="breadcrumb-item"><a href="/folder/{{ item.id }}">{{ item.name }}</a></li>
+        {% endfor %}
+    </ol>
+</nav>
+
+<div class="container">
+    <!-- Folders Section -->
+    <div class="folders-section mb-4">
+        <h3>Folders ({{ num_folders }})</h3>
+        <div class="g-container">
+            {% if folders %}
+                {% for item in folders %}
+                <div class="card m-3 shadow" style="width: 18rem;">
+                    <a href="/folder/{{ item.id }}" class="text-decoration-none text-reset">
+                        <div class="card-img-top object-fit-cover overflow-hidden border-bottom" style="height: 12rem;">
+                            <div class="d-flex align-items-center justify-content-center h-100 w-100">
+                                <i class="fa-solid fa-folder" style="font-size: 6rem;"></i>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <div class="flex-fill">
+                                    <h5 class="card-title">{{ item.name }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-body-secondary">- {{ item.created.strftime('%Y-%m-%d %H:%M:%S')}}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No folders available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Files Section -->
+    <div class="files-section">
+        <h3>Files ({{ num_files }})</h3>
+        <div class="g-container">
+            {% if files %}
+                {% for item in files %}
+                <div class="card m-3 shadow" style="width: 18rem;">
+                    <a href="/file/{{ item.id }}" class="text-decoration-none text-reset">
+                        {% set image_extensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'] %}
+                        {% set video_extensions = ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm'] %}
+                        {% set document_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'] %}
+                        {% set file_extension = item.url.split('.')[-1].lower() %}
+                
+                        {% if file_extension in image_extensions %}
+                            <img src="{{ item.url }}" height="200px" class="card-img-top object-fit-cover overflow-hidden border-bottom">
+                        {% elif file_extension in video_extensions %}
+                            <div class="card-img-top object-fit-cover overflow-hidden border-bottom d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fa-solid fa-video" style="font-size: 6rem;"></i>
+                            </div>
+                        {% elif file_extension in document_extensions %}
+                            <div class="card-img-top object-fit-cover overflow-hidden border-bottom d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fa-solid fa-file-alt" style="font-size: 6rem;"></i>
+                            </div>
+                        {% else %}
+                            <div class="card-img-top object-fit-cover overflow-hidden border-bottom d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fa-solid fa-file" style="font-size: 6rem;"></i>
+                            </div>
+                        {% endif %}
+                
+                        <div class="card-body">
+                            <div class="d-flex">
+                                <div class="flex-fill">
+                                    <h5 class="card-title">{{ item.name }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-body-secondary">- {{ item.created.strftime('%Y-%m-%d %H:%M:%S') }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No files available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var maxLength = 23; // Set your desired character limit
+
+        var elements = document.querySelectorAll('.card-title');
+
+        elements.forEach(function (element) {
+            var originalText = element.textContent;
+
+            if (originalText.length > maxLength) {
+                var truncatedText = originalText.substring(0, maxLength) + '...';
+                element.textContent = truncatedText;
+            }
+        });
+    });
+</script>
+{% endblock %}
