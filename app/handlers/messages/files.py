@@ -39,7 +39,7 @@ def upload_files(message):
         "owner": str(message.chat.id),
         "previous": current_folder_id,
         "name": file_name,
-        "date": datetime.now(),
+        "created": datetime.now(),
         "file_id": file_id,
         "file_path": file_path
     })[1].id
