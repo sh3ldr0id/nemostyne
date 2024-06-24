@@ -50,7 +50,7 @@ def retrive(message, currentFolder="Home", page=1):
     for fileId in page_files:
         file = files_collection.document(fileId).get()
 
-        file_date = file.get("date")
+        file_date = file.get("created")
         file_id = file.get("file_id")
 
         markup = types.InlineKeyboardMarkup(row_width=1)
