@@ -8,3 +8,16 @@
 
 
 {% endblock %}
+    <!-- Files Section -->
+    <section class="files-section">
+        <h3>Files ({{ num_files }})</h3>
+        <div class="g-container">
+            {% if files %}
+                {% for item in files %}
+                                
+                {% endfor %}
+            {% else %}
+                <p>No files available.</p>
+            {% endif %}
+        </div>
+    </section>

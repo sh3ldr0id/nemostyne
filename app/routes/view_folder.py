@@ -22,29 +22,29 @@ def view_folder(folder_id):
     if not folder_doc.exists:
         return redirect("/404")
     
-    folders = []
+    folders = folder_doc.get("folders")
     
-    for folderId in folder_doc.get("folders"):
-        folder = folders_collection.document(folderId).get()
+    # for folderId in folder_doc.get("folders"):
+    #     folder = folders_collection.document(folderId).get()
 
-        folders.append({
-            "id": folder.id,
-            "name": folder.get("name"),
-            "created": folder.get("created"),
-            "folders": len(folder.get("folders")),
-            "files": len(folder.get("files"))
-        })
+    #     folders.append({
+    #         "id": folder.id,
+    #         "name": folder.get("name"),
+    #         "created": folder.get("created"),
+    #         "folders": len(folder.get("folders")),
+    #         "files": len(folder.get("files"))
+    #     })
 
-    files = []
+    files = folder_doc.get("files")
 
-    for fileId in folder_doc.get("files"):
-        file = files_collection.document(fileId).get()
+    # for fileId in folder_doc.get("files"):
+    #     file = files_collection.document(fileId).get()
 
-        files.append({
-            "id": file.id,
-            "name": file.get("name"),
-            "created": file.get("created"),
-        })
+    #     files.append({
+    #         "id": file.id,
+    #         "name": file.get("name"),
+    #         "created": file.get("created"),
+    #     })
 
     return render_template(
         "folder.html", 

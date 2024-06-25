@@ -7,13 +7,16 @@
     .modal-dialog {
         max-width: 90%;
     }
+
     .modal-content {
         max-height: 90vh;
         overflow: hidden;
     }
+
     .modal-body {
         text-align: center;
     }
+
     .modal-body img,
     .modal-body video {
         max-width: 100%;
@@ -28,127 +31,59 @@
 <nav aria-label="breadcrumb" style="overflow: scroll;">
     <ol class="breadcrumb mt-2">
         {% for item in locations %}
-            <li class="breadcrumb-item"><a href="/folder/{{ item.id }}">{{ item.name }}</a></li>
+        <li class="breadcrumb-item"><a href="/folder/{{ item.id }}">{{ item.name }}</a></li>
         {% endfor %}
     </ol>
 </nav>
 
 <main class="container">
-    <!-- Folders Section -->
     <section class="folders-section mb-4">
         <h3>Folders ({{ num_folders }})</h3>
-        <div class="g-container">
-            {% if folders %}
-                {% for item in folders %}
-                <ul class="list-group m-3 shadow flex-row align-items-center">
-                    <a href="/folder/{{ item.id }}" class="list-group-item list-group-item-action d-flex align-items-center text-decoration-none text-reset border-0">
-                        <i class="fa-solid fa-folder me-3" style="font-size: 2rem;"></i>
-                        <div>
-                            <p class="text-body-primary mb-0">{{ item.name }}</p>
-                            <small class="text-body-secondary">{{ item.created.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-                        </div>
-                    </a>
-                    <i class="fa-solid fa-link mx-2" onclick="copyLink('/folder/{{ item.id }}')"></i>
-                </ul>
-                {% endfor %}
-            {% else %}
-                <p>No folders available.</p>
-            {% endif %}
+        <div class="g-container" id="folders">
         </div>
     </section>
 
-    <!-- Files Section -->
     <section class="files-section">
         <h3>Files ({{ num_files }})</h3>
-        <div class="g-container">
-            {% if files %}
-                {% for item in files %}
-                <ul class="list-group m-3 shadow flex-row align-items-center border">
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center text-decoration-none text-reset border-0 preview-file"
-                       data-file-name="{{ item.name }}"
-                       data-file-url="/file/{{ item.id }}">
-                        {% set image_extensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'] %}
-                        {% set video_extensions = ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm'] %}
-                        {% set document_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'] %}
-                        {% set file_extension = item.name.split('.')[-1].lower() %}
-                        
-                        {% if file_extension in image_extensions %}
-                            <i class="fa-solid fa-image me-3" style="font-size: 2rem;"></i>
-                        {% elif file_extension in video_extensions %}
-                            <i class="fa-solid fa-video me-3" style="font-size: 2rem;"></i>
-                        {% elif file_extension in document_extensions %}
-                            <i class="fa-solid fa-file-alt me-3" style="font-size: 2rem;"></i>
-                        {% else %}
-                            <i class="fa-solid fa-file me-3" style="font-size: 2rem;"></i>
-                        {% endif %}
-                        
-                        <div>
-                            <p class="text-body-primary mb-0">{{ item.name }}</p>
-                            <small class="text-body-secondary">{{ item.created.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-                        </div>
-                    </a>
-                    <li class="list-group-item border-0 p-0">
-                        <div class="dropdown">
-                            <i class="fa-solid fa-ellipsis-vertical px-3" style="font-size: 1.5rem;" id="dropdownMenuButton{{ item.id }}" data-bs-toggle="dropdown" aria-expanded="false"></i>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ item.id }}">
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="/file/{{ item.id }}">
-                                        <i class="fa-solid fa-download me-2"></i> Download
-                                    </a>
-                                </li>
-                                <li>
-                                    <button class="dropdown-item d-flex align-items-center" onclick="copyLink('/file/{{ item.id }}')">
-                                        <i class="fa-solid fa-link me-2"></i> Copy Link
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>                
-                {% endfor %}
-            {% else %}
-                <p>No files available.</p>
-            {% endif %}
+        <div class="g-container" id="files">
         </div>
     </section>
 </main>
 
-<!-- File Preview Modal -->
 <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-body">
-                <!-- Content will be dynamically added here based on the file type -->
             </div>
         </div>
     </div>
 </div>
 
-<script>
+<script type="module">
     async function copyLink(path) {
         try {
             await navigator.clipboard.writeText(window.location.origin + path);
+            alert('Link copied to clipboard');
         } catch (err) {
             alert('Failed to copy the link: ', err);
         }
     }
 
-    // Function to open file preview modal
-    function openFilePreview(fileType, fileName, fileUrl) {
-        fileType = get_file_type(fileName)
+    function openFilePreview(fileName, fileUrl) {
+        const fileType = getFileType(fileName);
 
-        var modalBody = document.querySelector('.modal-body');
+        const modalBody = document.querySelector('.modal-body');
         modalBody.innerHTML = ''; // Clear previous content
 
         if (fileType === 'image') {
-            var img = document.createElement('img');
+            const img = document.createElement('img');
             img.src = fileUrl;
             img.alt = fileName;
             modalBody.appendChild(img);
         } else if (fileType === 'video') {
-            var video = document.createElement('video');
+            const video = document.createElement('video');
             video.controls = true;
-            var source = document.createElement('source');
+            const source = document.createElement('source');
             source.src = fileUrl;
             source.type = 'video/mp4'; // Adjust according to video type
             video.appendChild(source);
@@ -159,36 +94,154 @@
         }
 
         // Open the modal
-        var filePreviewModal = new bootstrap.Modal(document.getElementById('filePreviewModal'), {
+        const filePreviewModal = new bootstrap.Modal(document.getElementById('filePreviewModal'), {
             keyboard: true
         });
         filePreviewModal.show();
     }
 
-    // Attach click event to preview-file links
-    document.addEventListener('DOMContentLoaded', function () {
-        var previewLinks = document.querySelectorAll('.preview-file');
-        previewLinks.forEach(function (link) {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                var fileType = this.getAttribute('data-file-type');
-                var fileName = this.getAttribute('data-file-name');
-                var fileUrl = this.getAttribute('data-file-url');
-                openFilePreview(fileType, fileName, fileUrl);
-            });
-        });
-    });
-
-    // Function to get file type based on extension
-    function get_file_type(filename) {
-        var ext = filename.split('.').pop().toLowerCase();
+    function getFileType(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
         if (['gif', 'png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp'].includes(ext)) {
             return 'image';
         } else if (['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm'].includes(ext)) {
             return 'video';
+        } else if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'].includes(ext)) {
+            return 'document';
         } else {
             return 'other';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const previewLinks = document.querySelectorAll('.preview-file');
+        previewLinks.forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const fileName = this.getAttribute('data-file-name');
+                const fileUrl = this.getAttribute('data-file-url');
+                openFilePreview(fileName, fileUrl);
+            });
+        });
+    });
+
+    function formatDateTime(date) {
+        date = new Date(date.seconds * 1000 + Math.floor(date.nanoseconds / 1000000));
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    const ICONS = {
+        "image": "image",
+        "video": "video",
+        "document": "file-alt",
+        "other": "file"
+    }
+
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCfaVQ7rQJQ1-2dNrj1rvBaMtVQqTL_n6I",
+        authDomain: "nemostyne-core.firebaseapp.com",
+        projectId: "nemostyne-core",
+        storageBucket: "nemostyne-core.appspot.com",
+        messagingSenderId: "574915725086",
+        appId: "1:574915725086:web:1170b007f88358564beb0f",
+        measurementId: "G-GNN7MH6RYY"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore();
+
+    const foldersCollection = collection(db, "folders");
+    const filesCollection = collection(db, "files");
+
+    const FOLDERS = {{ folders | tojson }};
+    const FILES = {{ files | tojson }};
+
+    const foldersElement = document.getElementById("folders");
+    const filesElement = document.getElementById("files");
+
+    if (FOLDERS.length == 0) foldersElement.innerHTML = `<p>No folders available.</p>`;
+    if (FILES.length == 0) filesElement.innerHTML = `<p>No files available.</p>`;
+
+    async function getFolders() {
+        for (const folderID of FOLDERS) {
+            const docRef = doc(foldersCollection, folderID);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+
+                foldersElement.innerHTML += `
+                    <ul class="list-group m-3 shadow flex-row align-items-center">
+                        <a href="/folder/${docSnap.id}" class="list-group-item list-group-item-action d-flex align-items-center text-decoration-none text-reset border-0">
+                            <i class="fa-solid fa-folder me-3" style="font-size: 2rem;"></i>
+                            <div>
+                                <p class="text-body-primary mb-0">${data.name}</p>
+                                <small class="text-body-secondary">${formatDateTime(data.created)}</small>
+                            </div>
+                        </a>
+                        <i class="fa-solid fa-link mx-2" onclick="copyLink('/folder/${docSnap.id}')"></i>
+                    </ul>
+                `;
+            }
+        }
+    }
+
+    async function getFiles() {
+        for (const fileID of FILES) {
+            const docRef = doc(filesCollection, fileID);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+
+                filesElement.innerHTML += `
+                    <ul class="list-group m-3 shadow flex-row align-items-center border">
+                        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center text-decoration-none text-reset border-0 preview-file"
+                            data-file-name="${data.name}"
+                            data-file-url="/file/${docSnap.id}">` 
+                            
+                                + `<i class="fa-solid fa-${ICONS[getFileType(data.name)]} me-3" style="font-size: 2rem;"></i>` +
+    
+                            `<div>
+                                <p class="text-body-primary mb-0">${data.name}</p>
+                                <small class="text-body-secondary">${formatDateTime(data.created)}</small>
+                            </div>
+                        </a>
+                        <li class="list-group-item border-0 p-0">
+                            <div class="dropdown">
+                                <i class="fa-solid fa-ellipsis-vertical px-3" style="font-size: 1.5rem;" id="dropdownMenuButton${docSnap.id}" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${docSnap.id}">
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="/file/${docSnap.id}">
+                                            <i class="fa-solid fa-download me-2"></i> Download
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item d-flex align-items-center" onclick="copyLink('/file/${docSnap.id}')">
+                                            <i class="fa-solid fa-link me-2"></i> Copy Link
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                `;
+            }
+        }
+    }
+
+    getFolders();
+    getFiles();
 </script>
 {% endblock %}
