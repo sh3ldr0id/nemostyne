@@ -40,16 +40,10 @@ def view_folder(folder_id):
     for fileId in folder_doc.get("files"):
         file = files_collection.document(fileId).get()
 
-        PATH = getURL(file.get("file_id"))
-
-        if not PATH:
-            continue
-
         files.append({
             "id": file.id,
             "name": file.get("name"),
             "created": file.get("created"),
-            "url": f'https://api.telegram.org/file/bot{API_TOKEN}/{PATH}'
         })
 
     return render_template(
