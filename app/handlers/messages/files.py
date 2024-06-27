@@ -4,11 +4,27 @@ from app.helpers.constants import TOKEN, CHANNELS
 
 from firebase_admin import firestore
 
-from requests import get
+import subprocess
 from PIL import Image
 from io import BytesIO
+from requests import get
 
 from datetime import datetime
+
+def generate_video_thumbnail(video_url):
+    thumbnail_path = "/tmp/thumbnail.jpg"
+    command = [
+        "ffmpeg", "-i", video_url, "-vf", "thumbnail", "-frames:v", "1", "-s", "200x200", thumbnail_path
+    ]
+
+    subprocess.run(command, check=True)
+
+    with open(thumbnail_path, "rb") as f:
+        thumb_io = BytesIO(f.read())
+
+    thumb_io.name = 'thumbnail.jpg'
+
+    return thumb_io
 
 db = firestore.client()
 
@@ -49,8 +65,14 @@ def upload_files(message):
             image.save(thumb_io, 'JPEG')
             thumb_io.seek(0)
 
+        elif file_ext in ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm']:
+            file_path = bot.get_file(file_id).file_path
+            file_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_path}"
+            
+            thumb_io = generate_video_thumbnail(file_url)
+
     except Exception as e:
-        thumb_io = None
+        print(e)
 
     thumbnail_file_id = None
 
