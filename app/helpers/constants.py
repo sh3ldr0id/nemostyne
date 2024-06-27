@@ -1,4 +1,4 @@
-from app import CHANNELS
+from app import TOKEN, CHANNELS
 
 OPEN_FOLDER = "CURRENT_"
 DELETE = "DELETE_"

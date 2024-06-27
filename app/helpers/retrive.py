@@ -73,7 +73,7 @@ def retrive(message, currentFolder="Home", page=1):
 
         total = len(files)/10
 
-        bot.send_message(message.chat.id, f"Page {page} out of {total if type(total) == int else total+1}", reply_markup=markup)
+        bot.send_message(message.chat.id, f"Page {page} out of {total if type(total) == int else int(total)+1}", reply_markup=markup)
 
     else:
         bot.send_message(message.chat.id, "That's it. :)")
