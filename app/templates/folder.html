@@ -59,7 +59,7 @@
     </div>
 </div>
 
-<script type="module">
+<script>
     async function copyLink(path) {
         try {
             await navigator.clipboard.writeText(window.location.origin + path);
@@ -68,83 +68,9 @@
             alert('Failed to copy the link: ', err);
         }
     }
+</script>
 
-    function openFilePreview(fileName, fileUrl) {
-        const fileType = getFileType(fileName);
-
-        const modalBody = document.querySelector('.modal-body');
-        modalBody.innerHTML = ''; // Clear previous content
-
-        if (fileType === 'image') {
-            const img = document.createElement('img');
-            img.src = fileUrl;
-            img.alt = fileName;
-            modalBody.appendChild(img);
-        } else if (fileType === 'video') {
-            const video = document.createElement('video');
-            video.controls = true;
-            const source = document.createElement('source');
-            source.src = fileUrl;
-            source.type = 'video/mp4'; // Adjust according to video type
-            video.appendChild(source);
-            modalBody.appendChild(video);
-        } else {
-            // Handle other file types or fallback to generic message
-            modalBody.textContent = 'Preview not available for this file type.';
-        }
-
-        // Open the modal
-        const filePreviewModal = new bootstrap.Modal(document.getElementById('filePreviewModal'), {
-            keyboard: true
-        });
-        filePreviewModal.show();
-    }
-
-    function getFileType(filename) {
-        const ext = filename.split('.').pop().toLowerCase();
-        if (['gif', 'png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp'].includes(ext)) {
-            return 'image';
-        } else if (['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm'].includes(ext)) {
-            return 'video';
-        } else if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'].includes(ext)) {
-            return 'document';
-        } else {
-            return 'other';
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const previewLinks = document.querySelectorAll('.preview-file');
-        previewLinks.forEach(function (link) {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                const fileName = this.getAttribute('data-file-name');
-                const fileUrl = this.getAttribute('data-file-url');
-                openFilePreview(fileName, fileUrl);
-            });
-        });
-    });
-
-    function formatDateTime(date) {
-        date = new Date(date.seconds * 1000 + Math.floor(date.nanoseconds / 1000000));
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
-
-    const ICONS = {
-        "image": "image",
-        "video": "video",
-        "document": "file-alt",
-        "other": "file"
-    }
-
+<script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getFirestore, collection, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -170,6 +96,49 @@
     const foldersElement = document.getElementById("folders");
     const filesElement = document.getElementById("files");
 
+    function getIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        if (['gif', 'png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp'].includes(ext)) {
+            return 'image';
+        } else if (['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm'].includes(ext)) {
+            return 'video';
+        } else if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'].includes(ext)) {
+            return 'file-alt';
+        } else {
+            return 'file';
+        }
+    }
+
+    function truncateName(name) {
+        return name.length > 18 ? name.slice(0, 18) + "..." : name;
+    }
+    
+    async function fetchThumbnail(docId) {
+        try {
+            const response = await fetch(`/thumbnail/${docId}`);
+            if (response.ok && response.redirected === false) {
+                const blob = await response.blob();
+                return URL.createObjectURL(blob);
+            }
+        } catch (error) {
+            return null;
+        }
+        return null;
+    }
+
+    function formatDateTime(date) {
+        date = new Date(date.seconds * 1000 + Math.floor(date.nanoseconds / 1000000));
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
     if (FOLDERS.length == 0) foldersElement.innerHTML = `<p>No folders available.</p>`;
     if (FILES.length == 0) filesElement.innerHTML = `<p>No files available.</p>`;
 
@@ -182,15 +151,15 @@
                 const data = docSnap.data();
 
                 foldersElement.innerHTML += `
-                    <ul class="list-group m-3 shadow flex-row align-items-center">
+                    <ul class="list-group shadow flex-row align-items-center">
                         <a href="/folder/${docSnap.id}" class="list-group-item list-group-item-action d-flex align-items-center text-decoration-none text-reset border-0">
                             <i class="fa-solid fa-folder me-3" style="font-size: 2rem;"></i>
                             <div>
-                                <p class="text-body-primary mb-0">${data.name}</p>
+                                <p class="text-body-primary mb-0">${truncateName(data.name)}</p>
                                 <small class="text-body-secondary">${formatDateTime(data.created)}</small>
                             </div>
                         </a>
-                        <i class="fa-solid fa-link mx-2" onclick="copyLink('/folder/${docSnap.id}')"></i>
+                        <i class="fa-solid fa-link mx-3" onclick="copyLink('/folder/${docSnap.id}')"></i>
                     </ul>
                 `;
             }
@@ -205,36 +174,27 @@
             if (docSnap.exists()) {
                 const data = docSnap.data();
 
+                const icon = getIcon(data.name);
+                var iconHtml = `<i class="fa-solid fa-${icon} m-3" style="font-size: 3rem;"></i>`;
+
+                if (icon == "image") {
+                    const thumbnailUrl = await fetchThumbnail(docSnap.id);
+
+                    if (thumbnailUrl) {
+                        iconHtml = `<img src="${thumbnailUrl}" alt="thumbnail" class="m-2 me-3" style="width: 64px; height: 64px; border-radius: 5px; object-fit: cover;">`;
+                    }
+                }
+
                 filesElement.innerHTML += `
-                    <ul class="list-group m-3 shadow flex-row align-items-center border">
-                        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center text-decoration-none text-reset border-0 preview-file"
-                            data-file-name="${data.name}"
-                            data-file-url="/file/${docSnap.id}">` 
-                            
-                                + `<i class="fa-solid fa-${ICONS[getFileType(data.name)]} me-3" style="font-size: 2rem;"></i>` +
-    
-                            `<div>
-                                <p class="text-body-primary mb-0">${data.name}</p>
+                    <ul class="list-group shadow flex-row align-items-center">
+                        <a href="/file/${docSnap.id}" class="list-group-item list-group-item-action d-flex align-items-center text-decoration-none text-reset border-0 p-0">
+                            ${iconHtml}
+                            <div>
+                                <p class="text-body-primary mb-0">${truncateName(data.name)}</p>
                                 <small class="text-body-secondary">${formatDateTime(data.created)}</small>
                             </div>
                         </a>
-                        <li class="list-group-item border-0 p-0">
-                            <div class="dropdown">
-                                <i class="fa-solid fa-ellipsis-vertical px-3" style="font-size: 1.5rem;" id="dropdownMenuButton${docSnap.id}" data-bs-toggle="dropdown" aria-expanded="false"></i>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${docSnap.id}">
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center" href="/file/${docSnap.id}">
-                                            <i class="fa-solid fa-download me-2"></i> Download
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <button class="dropdown-item d-flex align-items-center" onclick="copyLink('/file/${docSnap.id}')">
-                                            <i class="fa-solid fa-link me-2"></i> Copy Link
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
+                        <i class="fa-solid fa-link mx-3" onclick="copyLink('/file/${docSnap.id}')"></i>
                     </ul>
                 `;
             }

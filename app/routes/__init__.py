@@ -18,4 +18,4 @@ def home():
 def not_found(e):
     return "Invalid/Broken URL"
 
-from app.routes import view_folder, view_file
+from app.routes import view_folder, view_file, view_thumbnail
