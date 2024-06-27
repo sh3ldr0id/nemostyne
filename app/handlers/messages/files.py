@@ -43,7 +43,7 @@ def upload_files(message):
             response = get(file_url)
             
             image = Image.open(BytesIO(response.content))
-            image.thumbnail((50, 50))
+            image.thumbnail((200, 200))
             thumb_io = BytesIO()
             thumb_io.name = 'thumbnail.jpg'
             image.save(thumb_io, 'JPEG')
