@@ -28,7 +28,7 @@ def view_thumbnail(file_id):
                     yield chunk
     
     headers = {
-        'Content-Disposition': f'attachment; filename="{file_doc.get("name")}"'
+        'Content-Disposition': f'attachment; filename="thumbnail.jpg"'
     }
     
     return Response(generate(), headers=headers, content_type='application/octet-stream')
