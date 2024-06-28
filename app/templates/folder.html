@@ -110,7 +110,7 @@
     }
 
     function truncateName(name) {
-        return name.length > 22 ? name.slice(0, 22) + "..." : name;
+        return name.length > 9 ? name.slice(0, 9) + "..." : name;
     }
     
     async function fetchThumbnail(docId) {
@@ -175,27 +175,30 @@
                 const data = docSnap.data();
 
                 const icon = getIcon(data.name);
-                var iconHtml = `<i class="fa-solid fa-${icon} m-3" style="font-size: 3rem;"></i>`;
+                var iconHtml = `
+                <div class="card-img-top d-flex justify-content-center align-items-center">
+                    <i class="fa-solid fa-${icon}" style="font-size: 6rem;"></i>
+                </div>`;
 
                 if (["image", "video"].includes(icon)) {
                     const thumbnailUrl = await fetchThumbnail(docSnap.id);
 
                     if (thumbnailUrl) {
-                        iconHtml = `<img src="${thumbnailUrl}" alt="thumbnail" class="m-2 me-3" style="width: 64px; height: 64px; border-radius: 5px; object-fit: cover;">`;
+                        iconHtml = `<img src="${thumbnailUrl}" alt="thumbnail" class="card-img-bottom">`;
                     }
                 }
 
                 filesElement.innerHTML += `
-                    <ul class="list-group shadow flex-row align-items-center">
-                        <a href="/file/${docSnap.id}" class="list-group-item list-group-item-action d-flex align-items-center text-decoration-none text-reset border-0 p-0">
-                            ${iconHtml}
-                            <div>
-                                <p class="text-body-primary mb-0">${truncateName(data.name)}</p>
-                                <small class="text-body-secondary">${formatDateTime(data.created)}</small>
+                    <div class="card">
+                        <div class="card-body m-0 py-1 d-flex justify-content-between align-items-center">
+                            <div style="overflow: hidden;">
+                                <a href="/file/${docSnap.id}" class="card-title text-decoration-none mb-0 p-0">${truncateName(data.name)}</a> <br>
+                                <small class="text-body-secondary flex-1">450.65Mb</small> 
                             </div>
-                        </a>
-                        <i class="fa-solid fa-link mx-3" onclick="copyLink('/file/${docSnap.id}')"></i>
-                    </ul>
+                            <i class="fa-solid fa-link ps-2" onclick="copyLink('/file/${docSnap.id}')"></i>
+                        </div>
+                        ${iconHtml}
+                    </div>
                 `;
             }
         }
