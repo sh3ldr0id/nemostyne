@@ -8,6 +8,7 @@ import subprocess
 from PIL import Image
 from io import BytesIO
 from requests import get
+from os import remove
 
 from datetime import datetime
 
@@ -23,6 +24,8 @@ def generate_video_thumbnail(video_url):
         thumb_io = BytesIO(f.read())
 
     thumb_io.name = 'thumbnail.jpg'
+
+    remove(thumbnail_path)
 
     return thumb_io
 
@@ -59,7 +62,7 @@ def upload_files(message):
             response = get(file_url)
             
             image = Image.open(BytesIO(response.content))
-            image.thumbnail((200, 200))
+            image.thumbnail((256, 256))
             thumb_io = BytesIO()
             thumb_io.name = 'thumbnail.jpg'
             image.save(thumb_io, 'JPEG')
@@ -71,8 +74,8 @@ def upload_files(message):
             
             thumb_io = generate_video_thumbnail(file_url)
 
-    except Exception as e:
-        print(e)
+    except:
+        thumb_io = None
 
     thumbnail_file_id = None
 
