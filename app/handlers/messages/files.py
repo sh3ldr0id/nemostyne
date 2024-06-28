@@ -9,25 +9,9 @@ from PIL import Image
 from io import BytesIO
 from requests import get
 from os import remove
+from uuid import uuid4
 
 from datetime import datetime
-
-def generate_video_thumbnail(video_url):
-    thumbnail_path = "/tmp/thumbnail.jpg"
-    command = [
-        "ffmpeg", "-i", video_url, "-vf", "thumbnail", "-frames:v", "1", "-s", "200x200", thumbnail_path
-    ]
-
-    subprocess.run(command, check=True)
-
-    with open(thumbnail_path, "rb") as f:
-        thumb_io = BytesIO(f.read())
-
-    thumb_io.name = 'thumbnail.jpg'
-
-    remove(thumbnail_path)
-
-    return thumb_io
 
 db = firestore.client()
 
@@ -71,9 +55,21 @@ def upload_files(message):
         elif file_ext in ['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm']:
             file_path = bot.get_file(file_id).file_path
             file_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_path}"
-            
-            thumb_io = generate_video_thumbnail(file_url)
 
+            thumbnail_path = f"/tmp/{uuid4()}.jpg"
+            command = [
+                "ffmpeg", "-i", file_url, "-vf", "thumbnail,scale=256:256", "-frames:v", "1", thumbnail_path
+            ]
+
+            subprocess.run(command, check=True)
+
+            with open(thumbnail_path, "rb") as f:
+                thumb_io = BytesIO(f.read())
+
+            thumb_io.name = 'thumbnail.jpg'
+
+            remove(thumbnail_path)
+            
     except:
         thumb_io = None
 
