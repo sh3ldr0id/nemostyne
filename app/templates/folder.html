@@ -110,7 +110,7 @@
     }
 
     function truncateName(name) {
-        return name.length > 25 ? name.slice(0, 25) + "..." : name;
+        return name.length > 22 ? name.slice(0, 22) + "..." : name;
     }
     
     async function fetchThumbnail(docId) {
@@ -177,7 +177,7 @@
                 const icon = getIcon(data.name);
                 var iconHtml = `<i class="fa-solid fa-${icon} m-3" style="font-size: 3rem;"></i>`;
 
-                if (icon == "image") {
+                if (["image", "video"].includes(icon)) {
                     const thumbnailUrl = await fetchThumbnail(docSnap.id);
 
                     if (thumbnailUrl) {
