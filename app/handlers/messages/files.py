@@ -45,8 +45,8 @@ def upload_files(message):
             file_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_path}"
             response = get(file_url)
             
-            image = Image.open(BytesIO(response.content))
-            image.thumbnail((256, 256))
+            image = Image.open(BytesIO(response.content)).resize((250, 200))
+            
             thumb_io = BytesIO()
             thumb_io.name = 'thumbnail.jpg'
             image.save(thumb_io, 'JPEG')
@@ -58,7 +58,7 @@ def upload_files(message):
 
             thumbnail_path = f"/tmp/{uuid4()}.jpg"
             command = [
-                "ffmpeg", "-i", file_url, "-vf", "thumbnail,scale=256:256", "-frames:v", "1", thumbnail_path
+                "ffmpeg", "-i", file_url, "-vf", "thumbnail,scale=250:200", "-frames:v", "1", thumbnail_path
             ]
 
             subprocess.run(command, check=True)
