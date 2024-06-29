@@ -1,2 +1,4 @@
-nemostyne-admin/
-nemostyne-client/
+venv/
+**/__pycache__/
+
+config/
