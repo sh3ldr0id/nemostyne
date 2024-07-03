@@ -4,7 +4,7 @@ from app.helpers.consts import CHANNELS
 
 from flask import session, request, jsonify
 
-@app.route('/upload', methods=['POST'])
+@app.route('/new/file', methods=['POST'])
 def upload():
     token = session.get("token")
 

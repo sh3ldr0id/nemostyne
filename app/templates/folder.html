@@ -1,8 +1,115 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>{{name}}</title>
+<title>{{ name }}</title>
+<style>
+.floating-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.floating-btn .btn-group-vertical {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+.floating-btn:hover .btn-group-vertical {
+    display: flex;
+}
+.floating-btn .btn {
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+</style>
 {% endblock %}
 
 {% block body %}
+<nav aria-label="breadcrumb" style="overflow: scroll;">
+    <ol class="breadcrumb mt-2">
+        {% for item in locations %}
+        <li class="breadcrumb-item"><a href="/folder/{{ item.id }}">{{ item.name }}</a></li>
+        {% endfor %}
+    </ol>
+</nav>
+
+<main class="container">
+    <section class="folders-section mb-4">
+        <h3>Folders ({{ folders | length }})</h3>
+        <div class="g-container" id="folders">
+        </div>
+    </section>
+
+    <section class="files-section">
+        <h3>Files ({{ files | length }})</h3>
+        <div class="g-container" id="files">
+        </div>
+    </section>
+</main>
+
+<div class="floating-btn">
+    <div class="btn-group-vertical">
+        <button class="btn btn-primary" onclick="createFolder()">
+            <i class="fa-solid fa-folder-plus"></i>
+        </button>
+        <button class="btn btn-success" onclick="uploadFile()">
+            <i class="fa-solid fa-upload"></i>
+        </button>
+    </div>
+    <button class="btn btn-lg btn-danger">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+</div>
+
+<div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createFolderModalLabel">Create Folder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createFolderForm">
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Folder Name</label>
+                        <input type="text" class="form-control" id="folderName" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createFolder()">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function copyLink(path) {
+        try {
+            await navigator.clipboard.writeText(window.location.origin + path);
+            alert('Link copied to clipboard');
+        } catch (err) {
+            alert('Failed to copy the link: ', err);
+        }
+    }
+
+    function createFolder() {
+        alert('Create Folder clicked');
+    }
+
+    function uploadFile() {
+        alert('Upload File clicked');
+    }
+</script>
+
+<script type="module" src="/static/folder.js"></script>
 {% endblock %}

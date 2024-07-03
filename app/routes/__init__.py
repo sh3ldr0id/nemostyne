@@ -11,4 +11,4 @@ def not_found(e):
     return "Invalid/Broken URL"
 
 from app.routes.view import view_folder, view_file
-from app.routes.api import verify_token, serve_file
+from app.routes.api import serve_file, upload_file
